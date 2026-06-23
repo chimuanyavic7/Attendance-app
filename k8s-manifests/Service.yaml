@@ -3,7 +3,7 @@ kind: Service
 metadata:
   name: attendanceapp-service 
 spec:
-  type: LoadBalancer
+  type: NodePort
   selector:
     app: attendance-app
   ports:
