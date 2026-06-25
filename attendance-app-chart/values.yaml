@@ -1,5 +1,6 @@
 deployment:
   name: attendance-app
+  namespace: attendance-app
   containerPort: 5000
 
 # This will set the replicaset count more information can be found here: https://kubernetes.io/docs/concepts/workloads/controllers/replicaset/
@@ -9,35 +10,33 @@ label: attendance-app
 
 # This sets the container image more information can be found here: https://kubernetes.io/docs/concepts/containers/images/
 image:
-  repository: gauris17/attendanceapp
+  repository: chimuanyavic7/attendance-app
   # This sets the pull policy for images.
   pullPolicy: IfNotPresent
   # Overrides the image tag whose default is the chart appVersion.
-  tag: "v1"
+  tag: "v1.0.1"
 
-imagePullSecretName: docker-creds
 
-dockerRegistrySecret: AgBIy+cyPbB0rHToIjpu8RAmFrPqsvfDsFCL4IPSyvllTqrct3nJWHf2rl6PscDjx68GHF9lsTuLUxLbnqGXLrH/lK3FUOEuku1Z6DmqJg4ZOtBJ5TNdZBr48RLYuC48DlqSWqT+YeSDq0RZalIttUJGnM82ALceEIF194LlfNpaYp9+o2/vYaJWNU6Mkl+vFyWQ4GVbCIzhwVWMNbGGeKl+Yt1f+n628ktQmRMlMl4xegAeq4nDzhSHMIX2NBDS+Ka3toandkgESGs8dqL0Dnoicw+xKdLiM6n+Q5yZVzCGl9prke7L3HhDEgxSh6fT63CGa5H7G0VxSaD+3fYf+Pc46pQ4ZTvRisn7fPqR/J8r7sX/Dy0LHSgGa2TcK5R+YVpbA4VUqGT1LsWYphM3Od4bfLCHiTjfccKJaQzn80lYfZgG2GCjPQHxP7ymmmWtud6uDP3cpw7LZUPQrrDS8q6z7+vp/mbftnnU7ideSmp7amdDwMblfuPeeF9A8419+Yg5p6n+JrHDzUNm4605JK5JOEu3HECMMOBOlJnpy3k4+JeTvopK71bdaNRO5c8buuM0iVzY/B16nZeNdYaBEqNtcbONoO3AfjU9DeIBcxoQU6ARalVGkxTipP4Zc7WUNMPnbpQMxSRqAg2nv1mg+IHWvgnFdM5cRORa83X+4PVYD/ouVCWroLerLEuNfnJhg7ujuiSykB72pRM/2rzxyomSiOBNzH/Hpl7NPDCybbZ8+bd0Jcmh9On+ifGEmbPYZCVfSMQQ0UGcV3z6FhPbHkaAVlYwSoAUpUajv2QioeLYTchOdAynML7sByzgcQ1pZud7cQbTGdPCIb1Y15WC2RjCbMHvzj4dkokDKw==
 
 # Project namespace for your application
 namespace: attendance-app
 
 dbSecretName: db-secrets
 
-dbUser: AgAwCSwQAF4ZzmIZjmwQMtNDSCUYevWFWxzXm8fEdX03x78qYbRre27tXArC3/LRR29x8qnA9yq9pxs9GHVNubcjVHMbZuqB7cKdGxNSkqjB/qpqmqD1z0dizjnh9ABaZrRGD2iaqt7EaiAELANL5sxjhAPwfUKJH15yqlC6JoNxXotxw3zOcu5fAhv6fPjlVkk8cDcaq129PMK6wbPYFSBAnwJ0ZijwOG+gjVzqZMYAMXFqRzJbmMZPWuIWs767yRlJmPJ9ZP+Pl1C5Lb5R5ewvU1WWRqcnPfSEhJmPj/f2flIuVVrhaxA/xTCvXwfUESgyIe+rZkQi7YCA3kUvL6tW0imRrSvpmd40tf3ERrcDR725xI6e773zVdv8CBzUFhNRJ5K+HdqtlSLQpFf30V0tOwr9QtiWJ127OO5SWI6LNFr1F89VS1xgIXxxxJejalRIGt2B+FIXoLghkg/Eb5Vl3yKKv+IXF9sZuKuSgoUsPx9ke6OMtEk4Y5hJOEYRaJoebqPMCaqY5vBsJlT5HmbjamOvK7X6/ClBRGD2ZJ9fvjE8MvaZDXhXfVTQAaSN92N5JNOdak+q60NZsPBm5wV5qOgXBqll6NyvyPIDtekOc+O3al8FbxnASPbhINE1eqCVr5voGMC4aJQOTuRL/uXbh4isdpqYcI9obnvPyJ5BPLQco0A9P7q5Ko2o64TiQF7T/RCE8mDqIg==
-dbPassword: AgB/wVJBq6+ZuIESmS1AmG8JVPWpqees51SCKcvAoozxMqQM8FH9ya2LAx/j0ZiR+x3qdzK/2c7CPUFbTLM/l/e+ED3UoLQ+cm2dvxNOWlnnQI/3vdNX4BRC5DCqfyjFawYyhZlXd3XupWVeIUk+WCcxYIGNmpc5tcXMgwUF2f3rSemGMLFuqI+/1xAVCB7Lxp0u0H1foO80gH9JHrSG7NcLzbyLrCGjsI6ov+/5PR6EW/5d0GULfx7fNWmcuWbnQxAI12Qpi9f2o66MNPmPgSWXUw+0OxJNcllbf8b2dZKpeBIXmiHi1sl0I3mpilQLrErvG7nDAjYlMCeHs7D9PihCJbQ6Y0uUmRMgqCkPGV2HeeNKFrwTPNaSpUGvG2NrEDO2j4cIpkjkvMDEg40qAUnFaWaMlnDpWQxa9BAqLfNZIRq86TFP6lSZTvV4pgvHB7KAAAvZr6GqjcYdyAsPxJeqSH1dnFef21N++4XVICeguW5zddwUVU6Helwlq6aOwa3eXT6AsOpKiiQsXQmtWxRqvvgLmJdTCe570up5hMGxtZq/nuJU3I0MAenDEX5K0S8xiME2TNyxWtsgw2RgBWFV9wNMRB9P8XsRCBn55lqhFfg7X+a8G8vnnPpjJaG/68KfE2acVcs8TwKyv+nSN9n2svuFfShdWP3+hxK7KDKQ+1pXjrbiRHjHVn4ek9ly0zvAwHWC7JzEyA==
+DB_PASSWORD: AgASoZ6q7ILqQiCyhwWJxSoQq22WUblwkBuVcr4muRsW0/4QJphNeLpIHLW1RQxNWGALCnrloaC1e/SGtLFrjPFu157hGvNNMyGZTBK2mtr7xewdA1QhoC4kgqDwYDGm9pYkOKzLCzmGvoNBnFQvrIR/JNVEZXTuaMQ0Ho0dwZiXyIxP6J0rgcnztB+naVZHcWlFqQuU06Widw4vX4+xce9E8yr5SxFY8F6ahZr9MwqUZ0pC3t97YiqDc3t5xmhiKTr/k2O2cmy1s/xzHKEu0eDe1A621KHpqINrKxj75VobND+3Y46J41tHN1fQHYVFb6wRi4s0FUd8qBqHhs5b/uoWqUd3SEStIMa9Ycw+mBnO8OZM/YRmcDkAgk4ujiJhDVQah13baQWJwHOK2Twjqa/buRp0KpA6hIpi/V/GAqItUbcPZNyHo38bZ8i9sgT4kLZ+RRKiol56lGOqqWOQVGqQJrH5gSHb8l+YxEefRsGQjfhpZjTzyDay2E6N3H8UVHRo9LN3UgRy6wRf0bY5qqgkiPF86E/ih/JLkcZUFek6qBgzTIsov68/l3Vp3Np40kgyZUHYmYBX5tvRO7gwXEBElmi/2nPKQlf7LEXvzlzE4a+i1QoUf5BmeBHwoOZyYH3/8BLntjNoZcF1BLBQKzDK+IdBl2Pczk4dCCmSNHvtJbSrAfwAcqqgqvEPPA1dGj56BRRcwGL4dWMbaA==
 
 config:
   name: db-config
-  DB_HOST: database-1.cluster-cjo2qwqge1cu.ap-south-1.rds.amazonaws.com
-  DB_PORT: "5432"
-  DB_NAME: postgres
+  DB_USER: "admin"
+  DB_HOST: "172.17.0.2" 
+  DB_PORT: "7002"
+  DB_NAME: "postgres"
 
 # This is for setting up a service more information can be found here: https://kubernetes.io/docs/concepts/services-networking/service/
 service:
   name: attendance-app-service
   # This sets the service type more information can be found here: https://kubernetes.io/docs/concepts/services-networking/service/#publishing-services-service-types
-  type: LoadBalancer
+  type: NodePort
   # This sets the ports more information can be found here: https://kubernetes.io/docs/concepts/services-networking/service/#field-spec-ports
   port: 5000
   targetPort: 5000
@@ -51,24 +50,24 @@ resources:
     memory: "512Mi"
 
 # This section is for setting up autoscaling more information can be found here: https://kubernetes.io/docs/concepts/workloads/autoscaling/
-autoscaling:
-  enabled: true
-  minReplicas: 2
-  maxReplicas: 10
-  targetCPUUtilizationPercentage: 70
+# autoscaling:
+#  enabled: true
+#  minReplicas: 2
+#  maxReplicas: 10
+#  targetCPUUtilizationPercentage: 70
 
-  scaleDown:
-    stabilizationWindowSeconds: 30
-    pods: 1
-    periodSeconds: 30
+#  scaleDown:
+#    stabilizationWindowSeconds: 30
+#    pods: 1
+#    periodSeconds: 30
 
-  scaleUp:
-    stabilizationWindowSeconds: 30
-    pods: 1
-    periodSeconds: 30
+#  scaleUp:
+#    stabilizationWindowSeconds: 30
+#    pods: 1
+#    periodSeconds: 30
 
-hpa:
-  name: attendance-app-hpa
-  targetDeployment: attendance-app
+# hpa:
+#  name: attendance-app-hpa
+#  targetDeployment: attendance-app
 
 

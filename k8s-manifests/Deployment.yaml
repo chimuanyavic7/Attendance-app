@@ -2,6 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: attendance-app 
+  namespace: attendance-app
   labels:
     app: attendance-app 
 spec:
@@ -24,7 +25,7 @@ spec:
       containers:
         - name: attendance-app-container 
           image: chimuanyavic7/attendance-app:v1.0.1
-          imagePullPolicy: Always
+          imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 5000
 
@@ -40,7 +41,23 @@ spec:
             - configMapRef:
                 name: postgres-config
             - secretRef:
-                name: db-secrets       
+                name: db-secrets  
+
+          livenessProbe:
+            httpGet:
+              path: /api/health
+              port: 5000
+            initialDelaySeconds: 30
+            periodSeconds: 15
+            timeoutSeconds: 5
+
+          readinessProbe:
+            httpGet:
+              path: /api/health
+              port: 5000
+            initialDelaySeconds: 10
+            periodSeconds: 5
+            timeoutSeconds: 3           
                 
       
 
