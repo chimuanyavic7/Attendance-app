@@ -50,24 +50,24 @@ resources:
     memory: "512Mi"
 
 # This section is for setting up autoscaling more information can be found here: https://kubernetes.io/docs/concepts/workloads/autoscaling/
-# autoscaling:
-#  enabled: true
-#  minReplicas: 2
-#  maxReplicas: 10
-#  targetCPUUtilizationPercentage: 70
+ autoscaling:
+  enabled: true
+  minReplicas: 2
+  maxReplicas: 10
+  targetCPUUtilizationPercentage: 70
 
-#  scaleDown:
-#    stabilizationWindowSeconds: 30
-#    pods: 1
-#    periodSeconds: 30
+  scaleDown:
+    stabilizationWindowSeconds: 30
+    pods: 1
+    periodSeconds: 30
 
-#  scaleUp:
-#    stabilizationWindowSeconds: 30
-#    pods: 1
-#    periodSeconds: 30
+  scaleUp:
+    stabilizationWindowSeconds: 30
+    pods: 1
+    periodSeconds: 30
 
-# hpa:
-#  name: attendance-app-hpa
-#  targetDeployment: attendance-app
+ hpa:
+  name: attendance-app-hpa
+  targetDeployment: attendance-app
 
 
