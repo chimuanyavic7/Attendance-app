@@ -1,7 +1,7 @@
 # -----------------------------
 # 1. Builder Stage
 # -----------------------------
-FROM python:3.11-slim AS builder
+FROM python:3.11.13-slim-bookworm AS builder
 
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
@@ -22,7 +22,7 @@ RUN pip install --prefix=/install -r requirements.txt
 # -----------------------------
 # 2. Runtime Stage
 # -----------------------------
-FROM python:3.11-slim
+FROM python:3.11.13-slim-bookworm
 
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1
