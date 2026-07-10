@@ -11,7 +11,6 @@ on:
 
 permissions:
   contents: write
-  security-events: write
 
 env:
   IMAGE_NAME: ${{ secrets.DOCKERHUB_USERNAME }}
@@ -54,6 +53,7 @@ jobs:
       version: ${{ steps.bump.outputs.version }}
       release: ${{ steps.bump.outputs.release }}
       sha: ${{ steps.commit.outputs.sha }}
+      image_tag: ${{ steps.image_tag.outputs.image_tag }}
 
     steps:
 
@@ -125,14 +125,25 @@ jobs:
           echo "release=$RELEASE" >> $GITHUB_OUTPUT
 
 
+      - name: Generate Docker Image Tag
+        id: image_tag
+        run: |
+          VERSION=${{ steps.bump.outputs.version }}
+          SHA=${{ steps.commit.outputs.sha }}
+
+          IMAGE_TAG="${VERSION}-${SHA}"
+
+          echo "image_tag=$IMAGE_TAG" >> $GITHUB_OUTPUT   
+
+
       - name: Create and push tag
         if: steps.bump.outputs.release == 'true'
         run: |
-
           git config user.name "github-actions"
           git config user.email "github-actions@github.com"
           git tag ${{ steps.bump.outputs.version }}
           git push origin ${{ steps.bump.outputs.version }}
+
 
 
 
@@ -143,21 +154,21 @@ jobs:
   docker:
 
     name: Build & Push Image
-
     runs-on: ubuntu-latest
-
     needs: version
 
     env:
-      VERSION: ${{ needs.version.outputs.version }}
-      SHA: ${{ needs.version.outputs.sha }}
+      IMAGE_TAG: ${{ needs.version.outputs.image_tag }}
 
 
     steps:
 
       - uses: actions/checkout@v4
+
       - name: Setup Docker Buildx
         uses: docker/setup-buildx-action@v3
+        with:
+          driver: docker-container
 
 
       - name: Login DockerHub
@@ -175,9 +186,7 @@ jobs:
           context: .
           push: true
           tags: |
-            ${{ env.IMAGE_NAME }}/attendance-app:${{ env.VERSION }}
-            ${{ env.IMAGE_NAME }}/attendance-app:${{ env.SHA }}
-
+            ${{ env.IMAGE_NAME }}/attendance-app:${{ env.IMAGE_TAG }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
           provenance: true
@@ -192,14 +201,9 @@ jobs:
   validate:
 
     name: Validate Helm Chart
-
     runs-on: ubuntu-latest
-
-    needs:
-      - docker
-      - version
-
-
+    needs: [docker, version]
+     
     steps:
       - uses: actions/checkout@v4
       - name: Setup Helm
@@ -212,9 +216,8 @@ jobs:
 
       - name: Helm template test
         run: |
-
           helm template helm/attendance-app-chart \
-            --set image.tag=${{ needs.version.outputs.version }}
+            --set image.tag=${{ needs.version.outputs.image_tag }}
 
 
 
@@ -225,46 +228,31 @@ jobs:
   image-scan:
     name: Security Scan (Trivy)
     runs-on: ubuntu-latest
-    needs:
-      - docker
-      - version
+    needs: [docker, version ]
+     
 
     steps:
-
       - uses: actions/checkout@v4
       - name: Scan Version Image
         uses: aquasecurity/trivy-action@master
         with:
-          image-ref: ${{ env.IMAGE_NAME }}/attendance-app:${{ needs.version.outputs.version }}
+          image-ref: ${{ env.IMAGE_NAME }}/attendance-app:${{ needs.version.outputs.image_tag }}
           format: table
           exit-code: 1
           severity: CRITICAL,HIGH
 
 
-      - name: Scan SHA Image
-        uses: aquasecurity/trivy-action@master
-        with:
-          image-ref: ${{ env.IMAGE_NAME }}/attendance-app:${{ needs.version.outputs.sha }}
-          format: table
-          exit-code: 1
-          severity: CRITICAL,HIGH
-
-
+     
 
 # ==================================================
 # GITOPS UPDATE
 # ==================================================
 
   gitops:
-
     name: Update Helm Values
-
     runs-on: ubuntu-latest
-
-    needs:
-      - validate
-      - version
-      - image-scan
+    needs: [validate, version, image-scan]
+      
 
 
     steps:
@@ -275,12 +263,11 @@ jobs:
 
       - name: Update Helm Image Tag
         run: |
-          VERSION="${{ needs.version.outputs.version }}"
-          echo "Updating image tag to $VERSION"
-          yq eval -i \
-          ".image.tag = \"$VERSION\"" \
-          helm/attendance-app-chart/values.yaml
-
+          IMAGE_TAG="${{ needs.version.outputs.image_tag }}"
+          echo "Updating image tag to $IMAGE_TAG"
+          yq eval -i ".image.tag = \"$IMAGE_TAG\"" helm/attendance-app-chart/values.yaml
+           
+           
       - name: Commit and Push
         run: |
           git config user.name "github-actions"
@@ -290,5 +277,5 @@ jobs:
             echo "No changes detected"
             exit 0
           fi
-          git commit -m "deploy: ${{ needs.version.outputs.version }}"
+          git commit -m "deploy: ${{ needs.version.outputs.image_tag }}"
           git push origin main
