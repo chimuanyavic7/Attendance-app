@@ -24,165 +24,165 @@ jobs:
 # ==================================================
 # SECURITY - GITLEAKS
 # ==================================================
- gitleaks:
-    name: Secret Scan
-    runs-on: ubuntu-latest
+  gitleaks:
+      name: Secret Scan
+      runs-on: ubuntu-latest
 
-    permissions:
-      contents: read
+      permissions:
+        contents: read
 
-    steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
+      steps:
+        - name: Checkout Repository
+          uses: actions/checkout@v4
+          with:
+            fetch-depth: 0
 
-      - name: Run GitLeaks
-        uses: gitleaks/gitleaks-action@v2
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        - name: Run GitLeaks
+          uses: gitleaks/gitleaks-action@v2
+          env:
+            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
 # ==================================================
 # SEMANTIC VERSIONING
 # ==================================================
 
-version: 
-  name: Semantic Version + Git SHA
-  runs-on: ubuntu-latest
-  needs: gitleaks
+  version: 
+    name: Semantic Version + Git SHA
+    runs-on: ubuntu-latest
+    needs: gitleaks
 
-  outputs:
-    version: ${{ steps.bump.outputs.version }}
-    release: ${{ steps.bump.outputs.release }}
-    sha: ${{ steps.sha.outputs.short }}
+    outputs:
+      version: ${{ steps.bump.outputs.version }}
+      release: ${{ steps.bump.outputs.release }}
+      sha: ${{ steps.sha.outputs.short }}
 
-  steps:
-    - uses: actions/checkout@v4
-      with:
-        fetch-depth: 0
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
-    - name: Get latest version tag
-      id: last_version
-      run: |
-        git fetch --tags    
+      - name: Get latest version tag
+        id: last_version
+        run: |
+          git fetch --tags    
 
-        LAST_TAG=$(git tag --sort=-v:refname | head -n 1)
+          LAST_TAG=$(git tag --sort=-v:refname | head -n 1)
 
-        if [[ -z "$LAST_TAG" ]]; then
-          LAST_TAG="v1.0.0"
-        fi
+          if [[ -z "$LAST_TAG" ]]; then
+            LAST_TAG="v1.0.0"
+          fi
 
-        echo "last=$LAST_TAG" >> $GITHUB_OUTPUT
-
-
-    - name: Get commit SHA
-      id: commit
-      run: |
-        echo "sha=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
+          echo "last=$LAST_TAG" >> $GITHUB_OUTPUT
 
 
-    - name: Bump version
-      id: bump
-      run: |
-        LAST=${{ steps.last_version.outputs.last }}
-        VERSION=${LAST#v}
+      - name: Get commit SHA
+        id: commit
+        run: |
+          echo "sha=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
 
-        IFS='.' read -r MAJOR MINOR PATCH <<< "$VERSION"
 
-        commit_message=$(git log -1 --pretty=%B)
+      - name: Bump version
+        id: bump
+        run: |
+          LAST=${{ steps.last_version.outputs.last }}
+          VERSION=${LAST#v}
 
-        RELEASE=false
-  
+          IFS='.' read -r MAJOR MINOR PATCH <<< "$VERSION"
 
-        if [[ "$commit_message" == major:* ]]; then
-            MAJOR=$((MAJOR + 1))
-            MINOR=0
+          commit_message=$(git log -1 --pretty=%B)
+
+          RELEASE=false
+    
+
+          if [[ "$commit_message" == major:* ]]; then
+              MAJOR=$((MAJOR + 1))
+              MINOR=0
+              PATCH=0
+              RELEASE=true  
+    
+          elif [[ "$commit_message" == minor:* ]]; then
+            MINOR=$((MINOR + 1))
             PATCH=0
-            RELEASE=true  
-  
-        elif [[ "$commit_message" == minor:* ]]; then
-          MINOR=$((MINOR + 1))
-          PATCH=0
-          RELEASE=true
+            RELEASE=true
 
-        elif [[ "$commit_message" == patch:* ]]; then
-          PATCH=$((PATCH + 1))
-          RELEASE=true
-        fi
+          elif [[ "$commit_message" == patch:* ]]; then
+            PATCH=$((PATCH + 1))
+            RELEASE=true
+          fi
 
-        NEW_VERSION="v$MAJOR.$MINOR.$PATCH"
+          NEW_VERSION="v$MAJOR.$MINOR.$PATCH"
 
-        echo "version=$NEW_VERSION" >> $GITHUB_OUTPUT
-        echo "release=$RELEASE" >> $GITHUB_OUTPUT
+          echo "version=$NEW_VERSION" >> $GITHUB_OUTPUT
+          echo "release=$RELEASE" >> $GITHUB_OUTPUT
 
 
-    - name: Create and push tag
-      if: steps.bump.outputs.release == 'true'
-      run: |
-        git config user.name "github-actions"
-        git config user.email "github-actions@github.com"
+      - name: Create and push tag
+        if: steps.bump.outputs.release == 'true'
+        run: |
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
 
-        git tag ${{ steps.bump.outputs.version }}
-        git push origin ${{ steps.bump.outputs.version }}   
+          git tag ${{ steps.bump.outputs.version }}
+          git push origin ${{ steps.bump.outputs.version }}   
 
 
 # ---------------- DOCKER ----------------
-docker:
-  name: Build & Push Images
-  runs-on: ubuntu-latest
-  needs: version             
+  docker:
+    name: Build & Push Images
+    runs-on: ubuntu-latest
+    needs: version             
 
-  env:
-    VERSION: ${{ needs.version.outputs.version }}
-    SHA: ${{ needs.version.outputs.sha }}
-  steps:
-    - uses: actions/checkout@v4
+    env:
+      VERSION: ${{ needs.version.outputs.version }}
+      SHA: ${{ needs.version.outputs.sha }}
+    steps:
+      - uses: actions/checkout@v4
 
-    - name: Set up Docker Buildx
-      uses: docker/setup-buildx-action@v3
-      with:
-        driver: docker-container
-
-
-    - name: Login to DockerHub
-      uses: docker/login-action@v4
-      with:
-        username: ${{ secrets.DOCKERHUB_USERNAME }}
-        password: ${{ secrets.DOCKERHUB_TOKEN }}
-
-    - name: Build & Push Frontend
-      uses: docker/build-push-action@v5
-      with:
-        context: .
-        push: true
-        tags: |
-         ${{ env.IMAGE_NAME }}/attendance-app:${{ env.VERSION }}
-         ${{ env.IMAGE_NAME }}/attendance-app:${{ env.SHA }}
-
-        cache-from: type=gha
-        cache-to: type=gha,mode=max
-        # Security: provenance and SBOM
-        provenance: true
-        sbom: true    
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+        with:
+          driver: docker-container
 
 
-validate:
-  name: Validate Helm Chart
-  runs-on: ubuntu-latest
-  needs: [docker, version]
+      - name: Login to DockerHub
+        uses: docker/login-action@v4
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-  steps:
-    - uses: actions/checkout@v4
-    - uses: azure/setup-helm@v4
+      - name: Build & Push Frontend
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: true
+          tags: |
+          ${{ env.IMAGE_NAME }}/attendance-app:${{ env.VERSION }}
+          ${{ env.IMAGE_NAME }}/attendance-app:${{ env.SHA }}
 
-    - name: Helm lint
-      run: helm lint helm/attendance-app-chart
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          # Security: provenance and SBOM
+          provenance: true
+          sbom: true    
 
-    - name: Helm template test
-      run: |
-        helm template helm/attendance-app-chart \
-          --set image.tag=${{ needs.version.outputs.version }} 
-          --set image.tag=${{ needs.version.outputs.sha }}
+
+  validate:
+    name: Validate Helm Chart
+    runs-on: ubuntu-latest
+    needs: [docker, version]
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: azure/setup-helm@v4
+
+      - name: Helm lint
+        run: helm lint helm/attendance-app-chart
+
+      - name: Helm template test
+        run: |
+          helm template helm/attendance-app-chart \
+            --set image.tag=${{ needs.version.outputs.version }} 
+            --set image.tag=${{ needs.version.outputs.sha }}
 
 
 # ---------------- IMAGE SCAN ----------------
