@@ -9,14 +9,24 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
 
 WORKDIR /app
 
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    build-essential \
-    && rm -rf /var/lib/apt/lists/*
+RUN apt-get update && \
+    apt-get upgrade -y && \
+    apt-get install -y --no-install-recommends \
+        build-essential && \
+    rm -rf /var/lib/apt/lists/*
 
-RUN pip install --upgrade pip
+# Upgrade Python build tooling
+RUN pip install --upgrade \
+    pip \
+    setuptools>=78.1.1 \
+    wheel>=0.46.2
 
 COPY requirements.txt .
-RUN pip install --prefix=/install -r requirements.txt
+
+RUN pip install \
+    --prefix=/install \
+    --no-cache-dir \
+    -r requirements.txt
 
 
 # -----------------------------
@@ -29,21 +39,26 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
 
 WORKDIR /app
 
+# Apply security updates
+RUN apt-get update && \
+    apt-get upgrade -y && \
+    rm -rf /var/lib/apt/lists/*
+
 RUN useradd --create-home appuser
 
 COPY --from=builder /install /usr/local
-COPY . .
 
-COPY entrypoint.sh /entrypoint.sh
+COPY --chown=appuser:appuser . .
 
-# Convert Windows CRLF to Linux LF and set permissions
-RUN sed -i 's/\r$//' /entrypoint.sh \
-    && chmod +x /entrypoint.sh \
-    && chown appuser:appuser /entrypoint.sh
-    
+COPY --chown=appuser:appuser entrypoint.sh /entrypoint.sh
+
+RUN sed -i 's/\r$//' /entrypoint.sh && \
+    chmod +x /entrypoint.sh
+
 USER appuser
 
 EXPOSE 5000
 
 ENTRYPOINT ["/entrypoint.sh"]
-CMD ["gunicorn", "--bind", "0.0.0.0:5000", "app:app"]
+
+CMD ["gunicorn", "--workers=3", "--bind=0.0.0.0:5000", "app:app"]
