@@ -277,3 +277,27 @@ jobs:
           fi
           git commit -m "deploy: ${{ needs.version.outputs.image_tag }}"
           git push origin main
+
+
+  release:
+    name: Create Release Tag
+    runs-on: ubuntu-latest
+
+    needs: [gitops, version]
+     
+    if: needs.version.outputs.release == 'true'          
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Create Git Tag
+        run: |
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
+
+          git fetch --tags
+
+          git tag "${{ needs.version.outputs.version }}"
+          git push origin "${{ needs.version.outputs.version }}"    
