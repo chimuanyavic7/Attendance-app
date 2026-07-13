@@ -2,36 +2,26 @@ deployment:
   name: attendance-app
   namespace: attendance-app
   containerPort: 5000
-
 # This will set the replicaset count more information can be found here: https://kubernetes.io/docs/concepts/workloads/controllers/replicaset/
 replicaCount: 2
-
 label: attendance-app
-
 # This sets the container image more information can be found here: https://kubernetes.io/docs/concepts/containers/images/
 image:
   repository: chimuanyavic7/attendance-app
   # This sets the pull policy for images.
   pullPolicy: IfNotPresent
   # Overrides the image tag whose default is the chart appVersion.
-  tag: "v1.0.1"
-
-
-
+  tag: "v1.0.14-c765de5"
 # Project namespace for your application
 namespace: attendance-app
-
 dbSecretName: db-secrets
-
 DB_PASSWORD: AgAwVfbeS10PpytsUl1fbSba1o37Bajqi08Td8dhGr8N570lq5v8wGOWMC+6nZQZEaxHz25vI8BEgVsxBSsj8FU1TtFshC19eVBPyn2C/UEH5HgRg3jbSwiJcCxi/MTIHPlT7bMrQjW0BGx7tLtvFxvDNbJtgktaOKiwpmiwjTeFagTscfHuoTRdtG1zbQ1wYeqmqO4PPPAsR9hVViA2eXAeLp8Y9QaM/mRaUQSYzgesPE1dKpxnN0g30liSq3OwOlQaZy9MLcQRFGz4X4xZ1yjki+6AgHpaZXjQqx7DvoVuSxrUh74V7L7UYxA1AwJEi98rTiWzfhql9ylkjXmrIvPvf5nKWzxgz4iLzKUM+GLYpA/kC8HzCAKX3SluS9kOhVmlTua37I9SGW99LquuJQIyw/KHk992j2AXdzsDPwjd39SoxOLWYhtzjgLUNZtve93Av9fAc+cQRDNYbH1ig0DbxD1v02Vyww5ORrs11Y21QpDumYrY2AUpOgWi8E+QPxGXYXrmbS5J9tsxVEaY5j9WrhYDEzr1aLhu6YSvZSSgDkew0cyrRWSu++scUoz+btMgX5pRryp0csF0CVI2RzoqLJsvZb1Ai8vh6V/87O+BwOdYJRpzNPZFiU8X/4oemlM7/MxDobYPoFpkkEcKIh8YTYqLG6uur61qL/qydYbWxHxY3gzw8bJ0vV/Ui3ogTWzmJEamJPCdFB40VQ==
-
 config:
   name: db-config
   DB_USER: "admin"
-  DB_HOST: "172.17.0.2" 
+  DB_HOST: "172.17.0.2"
   DB_PORT: "7001"
   DB_NAME: "postgres"
-
 # This is for setting up a service more information can be found here: https://kubernetes.io/docs/concepts/services-networking/service/
 service:
   name: attendance-app-service
@@ -40,7 +30,6 @@ service:
   # This sets the ports more information can be found here: https://kubernetes.io/docs/concepts/services-networking/service/#field-spec-ports
   port: 5000
   targetPort: 5000
-
 resources:
   requests:
     cpu: "100m"
@@ -48,24 +37,20 @@ resources:
   limits:
     cpu: "500m"
     memory: "512Mi"
-
 # This section is for setting up autoscaling more information can be found here: https://kubernetes.io/docs/concepts/workloads/autoscaling/
 autoscaling:
   enabled: true
   minReplicas: 2
   maxReplicas: 10
   targetCPUUtilizationPercentage: 70
-
   scaleDown:
     stabilizationWindowSeconds: 30
     pods: 1
     periodSeconds: 30
-
   scaleUp:
     stabilizationWindowSeconds: 30
     pods: 1
     periodSeconds: 30
-
 hpa:
   name: attendance-app-hpa
   targetDeployment: attendance-app
