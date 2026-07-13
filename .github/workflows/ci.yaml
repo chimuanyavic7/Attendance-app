@@ -185,15 +185,15 @@ jobs:
 # IMAGE SECURITY SCAN
 # ==================================================
 
-#      - name: Security Scan (Trivy)
-#        uses: aquasecurity/trivy-action@v0.33.1
-#        with:
-#          image-ref: ${{ env.IMAGE_NAME }}/attendance-app:${{ needs.version.outputs.image_tag }}        
-#          format: "table"
-#          exit-code: "1"
-#          ignore-unfixed: true
-#          vuln-type: "os,library"
-#          severity: "CRITICAL,HIGH"
+      - name: Security Scan (Trivy)
+        uses: aquasecurity/trivy-action@v0.33.1
+        with:
+          image-ref: ${{ env.IMAGE_NAME }}/attendance-app:${{ needs.version.outputs.image_tag }}        
+          format: "table"
+          exit-code: "1"
+          ignore-unfixed: true
+          vuln-type: "os,library"
+          severity: "CRITICAL,HIGH"
 
 
 # ==================================================
