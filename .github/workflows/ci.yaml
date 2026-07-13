@@ -279,32 +279,32 @@ jobs:
           git push origin main
 
 
-  release:
-    name: Create Release Tag
-    runs-on: ubuntu-latest
+#  release:
+#    name: Create Release Tag
+#    runs-on: ubuntu-latest
 
-    needs: [gitops, version]
+#    needs: [gitops, version]
      
-    if: needs.version.outputs.release == 'true'          
+#    if: needs.version.outputs.release == 'true'          
 
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
+#    steps:
+#      - uses: actions/checkout@v4
+#        with:
+#          fetch-depth: 0
 
-      - name: Create Git Tag
-        run: |
-          git config user.name "github-actions"
-          git config user.email "github-actions@github.com"
+#      - name: Create Git Tag
+#        run: |
+#          git config user.name "github-actions"
+#          git config user.email "github-actions@github.com"
+#
+#          git fetch --tags
 
-          git fetch --tags
+#          VERSION="${{ needs.version.outputs.version }}"
+#
+#          if git rev-parse "$VERSION" >/dev/null 2>&1; then
+#            echo "Tag $VERSION already exists. Skipping."
+#            exit 0
+#          fi
 
-          VERSION="${{ needs.version.outputs.version }}"
-
-          if git rev-parse "$VERSION" >/dev/null 2>&1; then
-            echo "Tag $VERSION already exists. Skipping."
-            exit 0
-          fi
-
-          git tag "$VERSION"
-          git push origin "$VERSION" 
+#          git tag "$VERSION"
+#          git push origin "$VERSION" 
