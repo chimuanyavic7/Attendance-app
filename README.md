@@ -204,14 +204,14 @@ kubectl get secret --namespace default monitoring-grafana -o jsonpath="{.data.ad
 
 
 
-### Install hashicorp vault on the cluster
+## Install hashicorp vault on the cluster
 ``` 
 helm repo add hashicorp https://helm.releases.hashicorp.com/
 helm repo update
 helm install vault hashicorp/vault --set "server.dev.enabled=true"
 ```
 
-## port-forward
+#### port-forward
 ```
  kubectl port-forward svc/vault 8200:8200
 ```
@@ -222,7 +222,7 @@ helm repo update
 helm install external-secrets external-secrets/external-secrets --namespace external-secrets --create-namespace --set installCRDs=true
 ```
 
-### Install EBS CSI driver
+#### Install EBS CSI driver
 ```
 aws iam attach-role-policy \
   --role-name <NodeInstanceRoleName> \
