@@ -1,7 +1,8 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: attendanceapp-service 
+  name: attendanceapp-service
+  namespace: attendance-app
 spec:
   type: NodePort
   selector:

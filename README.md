@@ -201,3 +201,44 @@ kubectl get secret --namespace default monitoring-grafana -o jsonpath="{.data.ad
 
 - 15760
 - 1860
+
+
+
+### Install hashicorp vault on the cluster
+``` 
+helm repo add hashicorp https://helm.releases.hashicorp.com/
+helm repo update
+helm install vault hashicorp/vault --set "server.dev.enabled=true"
+```
+
+## port-forward
+```
+ kubectl port-forward svc/vault 8200:8200
+```
+
+```
+helm repo add external-secrets https://charts.external-secrets.io
+helm repo update
+helm install external-secrets external-secrets/external-secrets --namespace external-secrets --create-namespace --set installCRDs=true
+```
+
+### Install EBS CSI driver
+```
+aws iam attach-role-policy \
+  --role-name <NodeInstanceRoleName> \
+  --policy-arn arn:aws:iam::aws:policy/service-role/AmazonEBSCSIDriverPolicy
+```
+
+```
+kubectl apply -k "github.com/kubernetes-sigs/aws-ebs-csi-driver/deploy/kubernetes/overlays/stable/?ref=release-1.44"
+```
+
+##  Steps to be followed
+
+- 1. Create a secret for vault-token
+```
+kubectl create secret generic vault-token \
+  --namespace default \
+  --from-literal=token=root
+```
+- 2. Add secrets to the vault
